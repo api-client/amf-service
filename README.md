@@ -4,9 +4,9 @@
 
 A node service that act as a backed for an AMF graph stores.
 The service support multiple graph instances at once. After initializing a graph session a unique identifier is issued to the client. This identifier is then used to connect to a specific graph instance.
-This was multiple clients can operate on the same graph instance.
+This is done so multiple clients can operate on the same graph instance.
 
-The server support SSE (server-sent events). An event is dispatched to connected clients when a store object is modified. To register a client use the `v1/store/events/{pid}` endpoint, where the `pid` is the id received from the session initialization.
+The server support SSE (server-sent events). An event is dispatched to connected clients when the store object is modified. To register a client use the `v1/store/events/{pid}` endpoint, where the `pid` is the id received from the session initialization.
 
 ## Examples
 
@@ -178,6 +178,21 @@ Response
   "status": "closed",
   "id": "[PID]"
 }
+```
+
+### Event message
+
+Each store mutation dispatches an event which is the same as the DOM events defined in the `@api-client/amf-store` package. The body of the event is also identical to a DOM event dispatched by the same module. This makes it easier to create a proxy on the client side using the same interfaces:
+
+```javascript
+import { StoreEventTypes } from "@api-client/amf-store";
+
+const source = new EventSource("//localhost:8080/v1/store/events/[PID]", { withCredentials: true } );
+
+source.addEventListener(StoreEventTypes.Endpoint.State.created, function(event) {
+  const changeRecord = JSON.parse(event.data);
+  document.body.dispatchEvent(event.type, changeRecord);
+});
 ```
 
 ## Development
