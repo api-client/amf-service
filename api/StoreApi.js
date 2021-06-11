@@ -11,7 +11,9 @@ import { BaseApi } from './BaseApi.js';
 const router = express.Router();
 export default router;
 
-router.use(express.json());
+router.use(express.json({
+  limit: '50MB',
+}));
 
 /**
  * An API to support /me route
@@ -133,8 +135,12 @@ class StoreApiRoute extends BaseApi {
     const headers = {
       'Content-Type': 'text/event-stream',
       'Connection': 'keep-alive',
-      'Cache-Control': 'no-cache'
+      'Cache-Control': 'no-cache',
     };
+    // if (this.checkOrigin(req)) {
+    //   headers['Access-Control-Allow-Credentials'] = true;
+    //   headers['Access-Control-Allow-Origin'] = req.header('Origin');
+    // }
     res.writeHead(200, headers);
     const ack = {
       kind: 'AMF#Event',
@@ -155,5 +161,5 @@ api.wrapApi(router, [
   ['/start-session', 'startAmfSession'],
   ['/:id', 'endAmfSession', 'delete'],
   ['/', 'proxy', 'post'],
-  ['/events/:id', 'events']
+  ['/events/:id', 'events'],
 ]);

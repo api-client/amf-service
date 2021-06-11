@@ -64,26 +64,38 @@ export const processCors = Symbol('processCors')
    * @param {Function} callback
    */
   [processCors](req, callback) {
-    const whitelist = [
-      'https://apimodeling.io',
-    ];
-    const origin = req.header('Origin');
+    const hasValidOrigin = this.checkOrigin(req);
     let corsOptions;
-    if (!origin) {
-      corsOptions = { origin: false };
-    } else if (origin.includes('http://localhost:') || origin.includes('http://127.0.0.1:')) {
-      corsOptions = { origin: true };
-    } else if (whitelist.includes(origin)) {
-      corsOptions = { origin: true };
-    }
-    if (corsOptions) {
-      // @ts-ignore
-      corsOptions.credentials = true;
-      // @ts-ignore
-      corsOptions.allowedHeaders = ['Content-Type', 'Authorization', 'Origin'];
-      // @ts-ignore
-      corsOptions.origin = origin;
+    if (hasValidOrigin) {
+      corsOptions = {
+        credentials: true,
+        allowedHeaders: ['Content-Type', 'Authorization', 'Origin'],
+        origin: req.header('Origin'),
+      };
     }
     callback(null, corsOptions);
+  }
+
+  /**
+   * Checks whether the origin header is whitelisted and allowed to be used.
+   * @param {Request} req
+   * @returns {boolean}
+   */
+  checkOrigin(req) {
+    const origin = req.header('Origin');
+    if (!origin) {
+      return false;
+    }
+    // dev
+    if (origin.includes('http://localhost:') || origin.includes('http://127.0.0.1:')) {
+      return true;
+    }
+    const whitelist = [
+      'https://to-be-discussed.io',
+    ];
+    if (whitelist.includes(origin)) {
+      return true;
+    }
+    return false;
   }
 }

@@ -22,6 +22,7 @@ export class EventClient {
     const eventPart = `event: ${type}\n`;
     const dataPart = `data: ${JSON.stringify(data)}\n\n`;
     this.res.write(`${eventPart}${dataPart}`);
+    this.res.flush();
   }
 
   /**
